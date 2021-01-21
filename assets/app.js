@@ -1,473 +1,39 @@
-const kick = new Audio("assets/mp3/alfaia-d.mp3");
-const tom = new Audio("assets/mp3/alfaia-g.mp3");
-
-const alfaia_virada_l = new Audio("assets/mp3/alfaia-virada-left.mp3");
-const alfaia_virada_r = new Audio("assets/mp3/alfaia-virada-r-0.mp3");
-const alfaia_virada_r_loud = new Audio("assets/mp3/alfaia-virada-right.mp3");
-
-const alfaia_meio_l = new Audio("assets/mp3/alfaia-meio-left.mp3");
-const alfaia_meio_r = new Audio("assets/mp3/alfaia-meio-right.mp3");
-
-const agbe_l = new Audio("assets/mp3/agbe-left.mp3");
-agbe_l.volume = .5;
-const agbe_r = new Audio("assets/mp3/agbe-right.mp3");
-agbe_r.volume = .5;
-
-const gongue1 = new Audio("assets/mp3/gongue1.mp3");
-gongue1.volume = .15;
-const gongue2 = new Audio("assets/mp3/gongue2.mp3");
-gongue2.volume = .2;
-
 const btn_play = document.querySelector('.btn-play');
-var raf = window.requestAnimationFrame;
-var caf = window.cancelAnimationFrame;
+const btn_type = document.querySelectorAll('.sidebar button');
+const content = document.querySelector('.content');
+const tempo = content.querySelector('.tempo');
+const header = content.querySelector('header');
+const tracks = content.querySelector('.tracks');
+var raf = requestAnimationFrame;
+var caf = cancelAnimationFrame;
 var req;
 var lis;
-const tracks = document.querySelector('.tracks');
-const btn_type = document.querySelectorAll('.sidebar button');
-btn_type.forEach(btn => btn.onclick = () => change(btn.value));
 var type = 0;
+/*
+const context = new AudioContext();
+var loaded = 0;
+for(let key in datas){
+	window.fetch(datas[key].src)
+	.then(response => response.arrayBuffer())
+	.then(arrayBuffer => context.decodeAudioData(arrayBuffer))
+	.then(audioBuffer => {
+		datas[key].audio = audioBuffer;
+		loaded++;
+		if(loaded == datas.length) init();
+	});
+}*/
 
-
-const arr = [
-	{
-		name: 'baque 1',
-		tempo: 120,
-		tracks: [
-			{
-				name: "Alfaia",
-				left: {
-					audio: tom,
-					timeline: [
-						0,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0,
-						0,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0,
-						0,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0,
-						0,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0,
-					]
-				},
-				right: {
-					audio: kick,
-					timeline: [
-						1,0,0,0, 0,0,1,0, 0,1,0,0, 0,1,0,0,
-						1,0,0,0, 0,0,1,0, 0,1,0,0, 0,1,0,0,
-						1,0,0,0, 0,0,1,0, 0,1,0,0, 0,1,0,0,
-						1,0,0,0, 0,0,1,0, 0,1,0,0, 0,1,0,0
-					],
-				}
-			},
-			{
-				name: "Gongué",
-				left: {
-					audio: gongue1,
-					timeline: [
-						0,1,0,0, 1,0,1,0, 0,1,0,0, 1,0,1,0,
-						0,1,0,0, 1,0,1,0, 0,1,0,0, 1,0,1,0,
-						0,1,0,0, 1,0,1,0, 0,1,0,0, 1,0,1,0,
-						0,1,0,0, 1,0,1,0, 0,1,0,0, 1,0,1,0
-					]
-				}
-			},
-			{
-				name: "Agbé",
-				left: {
-					audio: agbe_l,
-					timeline: [
-						1,0,0,1, 0,0,1,0, 1,0,0,1, 0,0,1,0,
-						1,0,0,1, 0,0,1,0, 1,0,0,1, 0,0,1,0,
-						1,0,0,1, 0,0,1,0, 1,0,0,1, 0,0,1,0,
-						1,0,0,1, 0,0,1,0, 1,0,0,1, 0,0,1,0
-					]
-				},
-				right: {
-					audio: agbe_r,
-					timeline: [
-						0,0,1,0, 1,0,0,1, 0,0,1,0, 1,0,0,1,
-						0,0,1,0, 1,0,0,1, 0,0,1,0, 1,0,0,1,
-						0,0,1,0, 1,0,0,1, 0,0,1,0, 1,0,0,1,
-						0,0,1,0, 1,0,0,1, 0,0,1,0, 1,0,0,1
-					]
-				}
-			}
-
-		]
-	},
-	{
-		name: 'baque 2',
-		tempo: 120,
-		tracks: [
-			{
-				name: "Alfaia",
-				left: {
-					audio: tom,
-					timeline: [
-						0,0,0,0, 0,0,0,0, 1,0,0,0, 1,0,0,0,
-						0,0,0,0, 0,0,0,0, 1,0,0,0, 1,0,0,0,
-						0,0,0,0, 0,0,0,0, 1,0,0,0, 1,0,0,0,
-						0,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,1
-					]
-				},
-				right: {
-					audio: kick,
-					timeline: [
-						1,0,0,0, 0,0,0,0, 0,1,0,0, 0,1,0,0,
-						1,0,0,0, 0,0,0,0, 0,1,0,0, 0,1,0,0,
-						1,0,0,0, 0,0,0,0, 0,1,0,0, 0,1,0,0,
-						0,0,1,0, 0,0,1,0, 0,1,0,1, 0,0,1,0
-					]
-				}
-			},
-			{
-				name: "Gongué",
-				left: {
-					audio: gongue1,
-					timeline: [
-						1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0,
-						1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0,
-						1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0,
-						1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0
-					],
-				},
-				right: {
-					audio: gongue2,
-					timeline: [
-						0,0,1,0, 0,0,1,0, 0,1,0,1, 0,0,1,0,
-						0,0,1,0, 0,0,1,0, 0,1,0,1, 0,0,1,0,
-						0,0,1,0, 0,0,1,0, 0,1,0,1, 0,0,1,0,
-						0,0,1,0, 0,0,1,0, 0,1,0,1, 0,0,1,0,
-					],
-				}
-			},
-			{
-				name: "agbe",
-				left: {
-					audio: agbe_l,
-					timeline: [
-						1,0,0,1, 0,0,1,0, 1,0,0,1, 0,0,1,0,
-						1,0,0,1, 0,0,1,0, 1,0,0,1, 0,0,1,0,
-						1,0,0,1, 0,0,1,0, 1,0,0,1, 0,0,1,0,
-						1,0,0,1, 0,0,1,0, 1,0,0,1, 0,0,1,0
-					]
-				},
-				right: {
-					audio: agbe_r,
-					timeline: [
-						0,0,1,0, 1,0,0,1, 0,0,1,0, 1,0,0,1,
-						0,0,1,0, 1,0,0,1, 0,0,1,0, 1,0,0,1,
-						0,0,1,0, 1,0,0,1, 0,0,1,0, 1,0,0,1,
-						0,0,1,0, 1,0,0,1, 0,0,1,0, 1,0,0,1
-					]
-				}
-			},
-			{
-				name: "Alfaia virada",
-				left:{
-					audio: alfaia_virada_l,
-					timeline: [
-						0,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0,
-						1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0,
-						1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0,
-						1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,1
-					]
-				},
-				right: {
-					audio: alfaia_virada_r,
-					audio_low: alfaia_virada_r_loud,
-					timeline: [
-						1,0,0,1, 0,2,0,1, 0,2,0,1, 0,2,0,1,
-						0,0,0,1, 0,2,0,1, 0,2,0,1, 0,2,0,1,
-						0,0,0,1, 0,2,0,1, 0,2,0,1, 0,2,0,1,
-						0,0,1,0, 0,0,1,0, 0,1,0,1, 0,0,1,0
-					]
-				}
-
-			}
-		]
-	},
-	{
-		name: 'Arasto',
-		tempo: 120,
-		tracks: [
-			{
-				name: "Alfaia",
-				left: {
-					audio: tom,
-					timeline: [
-						0,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0,
-						0,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0,
-						0,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0,
-						0,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0
-					]
-				},
-				right: {
-					audio: kick,
-					timeline: [
-						1,0,0,0, 0,1,0,0, 0,1,0,0, 0,1,0,0,
-						1,0,0,0, 0,1,0,0, 0,1,0,0, 0,1,0,0,
-						1,0,0,0, 0,1,0,0, 0,1,0,0, 0,1,0,0,
-						1,0,0,0, 0,1,0,0, 0,1,0,0, 0,1,0,0
-					]
-				}
-			},
-
-			{
-				name: "gongue1",
-				left: {
-					audio: gongue1,
-					timeline: [
-						1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0,
-						1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0,
-						1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0,
-						1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0
-					]
-				},
-				right: {
-					audio: gongue2,
-					timeline: [
-						0,0,1,0, 0,0,1,0, 0,1,0,1, 0,0,1,0,
-						0,0,1,0, 0,0,1,0, 0,1,0,1, 0,0,1,0,
-						0,0,1,0, 0,0,1,0, 0,1,0,1, 0,0,1,0,
-						0,0,1,0, 0,0,1,0, 0,1,0,1, 0,0,1,0
-					]	
-				}
-				
-			}
-		]
-	},
-	{
-		name: 'test',
-		tempo: 120,
-		tracks: [
-			{
-				name: "Alfaia",
-				left: {
-					audio: tom,
-					timeline: [
-						0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,0,0,
-						0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,0,0,
-						0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,0,0,
-						0,0,1,0, 0,0,1,0, 0,0,0,0, 1,0,0,0
-					]
-				},
-				right: {
-					audio: kick,
-					timeline: [
-						1,0,0,1, 0,0,0,0, 0,1,0,1, 0,0,0,0,
-						1,0,0,1, 0,0,0,0, 0,1,0,1, 0,0,0,0,
-						1,0,0,1, 0,0,0,0, 0,1,0,1, 0,0,0,0,
-						1,0,0,0, 1,0,0,0, 0,1,0,1, 0,0,0,0
-					]	
-				}
-			},
-	
-			{
-				name: "gongue2",
-				left: {
-					audio: gongue2,
-					timeline: [
-						0,1,0,0, 1,0,1,0, 0,1,0,0, 1,0,1,0,
-						0,1,0,0, 1,0,1,0, 0,1,0,0, 1,0,1,0,
-						0,1,0,0, 1,0,1,0, 0,1,0,0, 1,0,1,0,
-						0,1,0,0, 1,0,1,0, 0,1,0,0, 1,0,1,0
-					]
-				}
-
-			}
-
-		]
-	},
-	{
-		name: 'baque 3',
-		tempo: 120,
-		tracks: [
-			{
-				name: "tom",
-				left: {
-					audio: tom,
-					timeline: [
-						0,1,0,0, 1,0,0,0, 0,0,0,0, 1,0,0,0,
-						0,1,0,0, 1,0,0,0, 0,0,0,0, 1,0,0,0,
-						0,0,1,0, 0,0,1,0, 0,0,0,0, 1,0,0,0,
-						0,0,1,0, 0,0,1,0, 0,0,0,0, 1,0,0,0
-					]
-				},
-				right: {
-					audio: kick,
-					timeline: [
-						1,0,0,1, 0,0,1,0, 0,1,0,1, 0,0,0,0,
-						1,0,0,1, 0,0,1,0, 0,1,0,1, 0,0,0,0,
-						1,0,0,0, 1,0,0,0, 0,1,0,1, 0,0,0,0,
-						1,0,0,0, 1,0,0,0, 0,1,0,1, 0,0,0,0
-					]
-				}
-			},
-
-			{
-				name: "Gongue",
-				left: {
-					audio: gongue1,
-					timeline: [
-						1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0,
-						1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0,
-						1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0,
-						1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0
-					]
-				},
-				right: {
-					audio: gongue2,
-					timeline: [
-						0,0,1,0, 0,0,1,0, 0,1,0,1, 0,0,1,0,
-						0,0,1,0, 0,0,1,0, 0,1,0,1, 0,0,1,0,
-						0,0,1,0, 0,0,1,0, 0,1,0,1, 0,0,1,0,
-						0,0,1,0, 0,0,1,0, 0,1,0,1, 0,0,1,0
-					]
-				}
-			}
-		]
-	},
-	{
-		name: 'Coco virado',
-		tempo: 120,
-		tracks: [
-			{
-				name: "Alfaia",
-				left: {
-					audio: tom,
-					timeline: [
-						0,0,0,1, 0,0,0,0, 0,0,0,1, 0,0,0,0,
-						0,0,0,1, 0,0,0,0, 0,0,0,1, 0,1,0,1,
-						0,0,0,1, 0,0,0,0, 0,0,0,1, 0,0,0,0,
-						0,0,0,1, 0,0,0,0, 0,0,0,1, 0,1,0,1,
-					]
-				},
-				right: {
-					audio: kick,
-					timeline: [
-						1,0,0,0, 0,0,0,0, 1,1,0,0, 0,0,0,0,
-						1,0,0,0, 0,0,0,0, 1,1,0,0, 0,0,1,0,
-						1,0,0,0, 0,0,0,0, 1,1,0,0, 0,0,0,0,
-						1,0,0,0, 0,0,0,0, 1,1,0,0, 0,0,1,0,
-					]	
-				}
-			},
-
-			{
-				name: "Gongué",
-				left: {
-					audio: gongue2,
-					timeline: [
-						1,0,0,1, 0,0,1,0, 1,0,0,1, 0,0,1,0,
-						1,0,0,1, 0,0,1,0, 1,0,0,1, 0,0,1,0,
-						1,0,0,1, 0,0,1,0, 1,0,0,1, 0,0,1,0,
-						1,0,0,1, 0,0,1,0, 1,0,0,1, 0,0,1,0,
-					]
-				}
-			}
-
-		]
-	},
-	{
-		name: 'Baque de parada',
-		tempo: 120,
-		tracks: [
-			{
-				name: "Alfaia",
-				left: {
-					audio: tom,
-					timeline: [
-						0,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,1,
-						0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
-						0,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,1,
-						0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
-					]
-				},
-				right: {
-					audio: kick,
-					timeline: [
-						1,0,0,1, 0,1,0,1, 0,1,0,1, 0,0,1,0,
-						1,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
-						1,0,0,1, 0,0,1,0, 0,1,0,1, 0,0,1,0,
-						1,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
-					]
-				}
-			},
-			{
-				name: "Gongué",
-				left: {
-					audio: gongue1,
-					timeline: [
-						1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0,
-						1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0,
-						1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0,
-						1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0,
-					]
-				},
-				right: {
-					audio: gongue2,
-					timeline: [
-						0,0,1,0, 0,0,1,0, 0,1,0,1, 0,0,1,0,
-						0,0,1,0, 0,0,1,0, 0,1,0,1, 0,0,1,0,
-						0,0,1,0, 0,0,1,0, 0,1,0,1, 0,0,1,0,
-						0,0,1,0, 0,0,1,0, 0,1,0,1, 0,0,1,0,
-					]
-				}
-			}
-		]
-	},
-	{
-		name: 'pere',
-		tempo: 120,
-		tracks: [
-			{
-				name: "Alfaia",
-				left: {
-					audio: tom,
-					timeline: [
-						0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,0,0,
-						0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,0,0,
-						0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,0,0,
-						0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,0,0,
-					]	
-				},
-				right: {
-					audio: kick,
-					timeline: [
-						1,0,0,1, 0,0,0,0, 1,0,0,1, 0,0,0,0,
-						1,0,0,1, 0,1,0,0, 1,0,0,1, 0,0,0,0,
-						1,0,0,1, 0,0,0,0, 1,0,0,1, 0,0,0,0,
-						1,0,0,1, 0,1,0,0, 1,0,0,1, 0,0,0,0,
-					]
-				}
-			},
-			{
-				name: "Gongué",
-				left: {
-					audio: gongue2,
-					timeline: [
-						1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0,
-						1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0,
-						1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0,
-						1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0,
-					]
-				}
-			}
-		]
-	},
-	
-]
-
+btn_type.forEach(btn => btn.onclick = () => change(btn.value));
 
 const change = value => {
 	type = value;
 	display();
 } 
 
-const tempo = document.querySelector('.tempo');
 
 const display = () => {
-	tracks.innerHTML = `<h1>${arr[type].name}</h1>`;
-	
-	const tempo = document.createElement('div');
-	tempo.className = 'tempo';
+    header.innerHTML = `<h1>${arr[type].name}</h1>`;
+
 	var bb = "<ol>";
 	var num = 1;
 	for(let i = 0; i<64; i++){
@@ -475,15 +41,17 @@ const display = () => {
 			bb += `<li>${num}</li>`;
 			num++;
 			if(num > 4) num = 1;
+        }
+        else if(i % 2 === 0) {
+			bb += `<li>.</li>`;
 		}
 		else  bb += `<li></li>`;
-		
 	}
 	bb += "</ol>";
 	tempo.innerHTML = bb;
-	tracks.append(tempo);
 	lis = document.querySelectorAll('.tempo li');
 
+    tracks.innerHTML = '';
 	for(let track of arr[type].tracks){
 		var po = "";
 		for(let i = 0; i<64; i++){
@@ -495,8 +63,6 @@ const display = () => {
 			else if(track.left.timeline[i] == 2) po += `<div class="point loud"></div>`;
 			po += `</div>`;
 			if(track.right){
-				
-			
 				po += `<div class="right">`;
 				if( track.right.timeline[i] == 1) po += `<div class="point"></div>`;
 				else if(track.right.timeline[i] == 2) po += `<div class="point loud"></div>`;
@@ -508,45 +74,85 @@ const display = () => {
 		const el = document.createElement('div');
 		el.className = 'track';
 		el.innerHTML = `<div class="name"><button>${track.name}</button></div><ol>${po}</ol>`;
-		tracks.append(el);
+        tracks.append(el);
+        const btn = el.querySelector('button');
+        if(track.mute) el.classList.add('mute');
+        btn.onclick = () => {
+            el.classList.toggle('mute');
+            if(el.classList.contains('mute')){
+                track.mute = true;
+            }else{
+                track.mute = false;
+            }
+        }
 	}	
 }
 
-var inc = 0;
+
+
+var speed = 100;
 var time = 0;
-const timer = () => {
-	inc = inc + 0.1;
-	if (inc >= 0.8) {
-		lis.forEach(li => li.classList.remove('active'));
-		lis[time].classList.add('active');
-		for(let track of arr[type].tracks){
-			if(track.left.timeline[time] == 1) {
-				track.left.audio.currentTime = 0;
-				track.left.audio.play();
-			}
-			if(track.left.timeline[time] == 2) {
-				track.left.audio_low.currentTime = 0;
-				track.left.audio_low.play();
-			}
-			if(track.right && track.right.timeline[time] == 1) {
-				track.right.audio.currentTime = 0;
-				track.right.audio.play();
-			}
-			if(track.right && track.right.timeline[time] == 2) {
-				track.right.audio_low.currentTime = 0;
-				track.right.audio_low.play();
-			}
+var inc = 0;
+var bpm = 100;
+
+const frame = () =>{
+	lis.forEach(li => li.classList.remove('active'));
+	lis[time].classList.add('active');
+	
+	for(let track of arr[type].tracks){
+		if(track.left.timeline[time] == 1 && !track.mute) {
+			track.left.audio.currentTime = 0;
+			track.left.audio.play();
+			//play(track.left.audio ,track)
 		}
+		if(track.left.timeline[time] == 2 && !track.mute) {
+			track.left.audio_low.currentTime = 0;
+			track.left.audio_low.play();
+		}
+		if(track.right && track.right.timeline[time] == 1 && !track.mute) {
+			track.right.audio.currentTime = 0;
+			track.right.audio.play();
+		}
+		if(track.right && track.right.timeline[time] == 2 && !track.mute) {
+			track.right.audio_low.currentTime = 0;
+			track.right.audio_low.play();
+		}
+	}
+}
+
+const bpmChange = () => {
+	//bpm = input.value;
+	speed = Math.round((60*1000 / (bpm*4)) / 16.66);
+}
+bpmChange();
+/*
+const timer = () => {
+	inc++;
+	if (inc >= speed) {
+		frame();
 		time++;
 		if(time >= 64) time = 0;
 		inc = 0;
 	}
-	 req = raf(timer);
+	req = raf(timer);
+}*/
+let prevTick = 0;  
+const timer = () => {
+	req = raf(timer);
+	let now = Math.round(4*bpm / 60 * Date.now() / 1000);
+   	if (now == prevTick) return;
+	prevTick = now;
+	frame();
+	time++;
+	if(time >= 64) time = 0;
 }
+const play = () => {
+	req = raf(timer)
+};
 
-const play = () => req = raf(timer);
-
-const stop = () => caf(req);
+const stop = () => {
+	caf(req)
+};
 
 btn_play.onclick = () => {
 	btn_play.classList.toggle('play');
